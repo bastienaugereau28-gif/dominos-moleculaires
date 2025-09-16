@@ -266,11 +266,6 @@
         body.level3-dominoes .domino {
             width: 350px;
         }
-
-        /* ----- RÈGLE AJOUTÉE POUR LE NIVEAU 4 ----- */
-        body.level4-active .domino {
-            width: 570px;
-        }
         
         #hand .domino {
             width: auto;
@@ -437,7 +432,7 @@
              </ul>
         </div>
         <div id="total-stars-counter">
-            Total des étoiles : <span id="total-stars-value">0</span> ★
+            Total des étoiles : <span id="total-stars-value">0</span> / <span id="max-stars-value"></span> ★
         </div>
     </div>
 
@@ -534,25 +529,6 @@
                     { id: 313, img: 'C2H6O.JPG',       formula: '2 NH_3 + O_2',    imgValue: 'C2H6O',      formulaValue: '2NH3+O2' },
                     { id: 314, img: '2Cl2.JPG',        formula: 'C_2H_6O',         imgValue: '2Cl2',       formulaValue: 'C2H6O' }
                 ]
-            },
-            level4: {
-                name: "Niveau 4",
-                data: [
-                    { id: 401, img: 'C+2H2O+CO2.JPG',      formula: '2 CO + 2 H_2O',                imgValue: 'C+2H2O+CO2',    formulaValue: '2CO+2H2O' },
-                    { id: 402, img: '2CO+2H2O.JPG',        formula: 'CO + CO_2 + H_2O + H_2',       imgValue: '2CO+2H2O',      formulaValue: 'CO+CO2+H2O+H2' },
-                    { id: 403, img: 'CO+CO2+H2O+H2.JPG',   formula: '2 H + O + H_2 + C_2 + O_3',    imgValue: 'CO+CO2+H2O+H2', formulaValue: '2H+O+H2+C2+O3' },
-                    { id: 404, img: '2H+O+H2+C2+O3.JPG',   formula: 'CO+CO_2+H_2O+2H',              imgValue: '2H+O+H2+C2+O3', formulaValue: 'CO+CO2+H2O+2H' },
-                    { id: 405, img: 'CO+CO2+H2O+2H.JPG',   formula: 'C_2 + O_2 + 2 H_2O',           imgValue: 'CO+CO2+H2O+2H', formulaValue: 'C2+O2+2H2O' },
-                    { id: 406, img: 'C2+O2+H2O.JPG',       formula: 'C + H_2O + 2 H + O + CO_2',    imgValue: 'C2+O2+2H2O',    formulaValue: 'C+H2O+2H+O+CO2' },
-                    { id: 407, img: 'C+H2O+2H+O+CO2.JPG',  formula: 'CO + H_2O + H + H_2 + O_2',    imgValue: 'C+H2O+2H+O+CO2',formulaValue: 'CO+H2O+H+H2+O2' },
-                    { id: 408, img: 'CO+H2O+H+H2+O2.JPG',  formula: 'CO_2 + 2 H_2 + C + O_2',       imgValue: 'CO+H2O+H+H2+O2',formulaValue: 'CO2+2H2+C+O2' },
-                    { id: 409, img: 'CO2+2H2+C+O2.JPG',    formula: '4 O + 2 C + 4 H',              imgValue: 'CO2+2H2+C+O2',  formulaValue: '4O+2C+4H' },
-                    { id: 410, img: '2O+2C+4H.JPG',        formula: 'H_2 + 2 H + 2 CO_2',           imgValue: '4O+2C+4H',      formulaValue: 'H2+2H+2CO2' },
-                    { id: 411, img: 'H2+2H+2CO2.JPG',      formula: 'CO_2 + H_2 + 2 H + O_2',       imgValue: 'H2+2H+2CO2',    formulaValue: 'CO2+H2+2H+O2' },
-                    { id: 412, img: 'CO2+H2+2H+O2.JPG',    formula: '2 C + 3 O + H_2O + 2H',        imgValue: 'CO2+H2+2H+O2',  formulaValue: '2C+3O+H2O+2H' },
-                    { id: 413, img: '2C+3O+H2O+2H.JPG',    formula: '2 H + 2 C + O + O_3 + H_2',    imgValue: '2C+3O+H2O+2H',  formulaValue: '2H+2C+O+O3+H2' },
-                    { id: 414, img: '2H+2C+O+O3+H2.JPG',   formula: 'C + 2 H_2O + CO_2',            imgValue: '2H+2C+O+O3+H2', formulaValue: 'C+2H2O+CO2' }
-                ]
             }
         };
 
@@ -622,6 +598,10 @@
                 buttonsContainer.appendChild(button);
             }
 
+            // MODIFIÉ : Calcule et affiche le nombre total d'étoiles possibles
+            const maxStars = Object.keys(levels).length * 5;
+            document.getElementById('max-stars-value').textContent = maxStars;
+
             menu.classList.remove('hidden');
             game.classList.add('hidden');
             winModal.style.display = 'none';
@@ -634,14 +614,12 @@
             const selectedLevel = levels[levelId];
             currentLevelId = levelId;
             
-            document.body.classList.remove('level4-active', 'level1-dominoes', 'level3-dominoes');
+            document.body.classList.remove('level1-dominoes', 'level3-dominoes');
 
             if (levelId === 'level1') {
                 document.body.classList.add('level1-dominoes');
             } else if (levelId === 'level3') {
                 document.body.classList.add('level3-dominoes');
-            } else if (levelId === 'level4') {
-                document.body.classList.add('level4-active');
             }
             
             menu.classList.add('hidden');
