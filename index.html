@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <title>Les Dominos Moléculaires</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #f4f7f6;
+            --text-dark: #3d3d3d;
+            --primary-blue: #3498db;
+            --star-yellow: #f1c40f;
+            --white: #ffffff;
+            --error-red: #e74c3c;
+            --medium-grey: #bdc3c7;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--background); 
+            color: var(--text-dark);
+            margin: 0;
+            padding: 2em 1em;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 1em;
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        h1::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 5px;
+            background-color: var(--primary-blue);
+            border-radius: 2px;
+            margin: 0.4em auto 0;
+        }
+        #level-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
+        #level-selection h2 {
+            font-weight: 600;
+            font-size: 1.8em;
+            margin-bottom: 1.5em;
+        }
+        
+        .info-box {
+            border-radius: 12px;
+            padding: 20px 25px;
+            text-align: left;
+        }
+
+        #rules-box {
+            background-color: #eaf2f8;
+            border: 1px solid #d4e6f1;
+            margin-bottom: 2em;
+            max-width: 450px;
+        }
+        #rules-box h4 {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+        #rules-box ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 0.9em;
+        }
+        #rules-box li {
+            margin-bottom: 5px;
+        }
+
+        #objectives-box {
+            background-color: var(--white);
+            border: 1px solid #e0e0e0;
+            margin-top: 2.5em;
+            max-width: 550px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #objectives-box h4 {
+            text-align: center;
+            margin: 0 0 15px 0;
+            font-weight: 600;
+        }
+        #objectives-box .scores-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        #objectives-box .scores-list span {
+            color: var(--star-yellow);
+        }
+
+        .level-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .level-btn {
+            background-color: transparent;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            padding: 18px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: 600;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            width: 350px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .level-btn:hover {
+            background-color: var(--primary-blue);
+            color: var(--white);
+        }
+        .stars-container {
+            font-size: 1.2em;
+            color: var(--star-yellow);
+        }
+        .star.dimmed {
+            opacity: 0.3;
+        }
+
+        #total-stars-counter {
+            margin-top: 2.5em;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-dark);
+            background-color: var(--white);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        #total-stars-value {
+            color: var(--star-yellow);
+            font-size: 1.2em;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+        #game-header {
+            width: 90vw;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: -10px;
+        }
+        #game-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin: 0;
+            padding: 0;
+        }
+        #game-title::after {
+            display: none;
+        }
+        #timer {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--text-dark);
+            background-color: var(--white);
+            padding: 5px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .timer-penalty {
+            color: var(--error-red);
+            transform: scale(1.1);
+        }
+        #back-to-menu-btn {
+            background-color: #e0e0e0;
+            color: var(--text-dark);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        #back-to-menu-btn:hover {
+            background-color: #cacfd2;
+        }
+        .game-section {
+            width: 90vw;
+            max-width: 1200px;
+        }
+        #hand-title, #board-title {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 0.8em;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        #hand-container {
+            position: relative;
+        }
+        #hand, #board {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+        #hand {
+            min-height: 120px;
+            justify-content: center;
+        }
+        #board {
+            min-height: 150px;
+            justify-content: flex-start;
+        }
+        .domino {
+            width: 500px; 
+            height: 100px;
+            border: 1px solid var(--medium-grey);
+            border-radius: 8px;
+            display: flex;
+            background-color: var(--white);
+            transition: all 0.2s ease-in-out;
+            flex-shrink: 0;
+            overflow: hidden; 
+            margin-bottom: 8px;
+        }
+        .domino-in-hand {
+            cursor: pointer;
+        }
+        .domino-part {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3em;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .domino-part.image-part {
+            border-right: 1px solid var(--light-grey);
+        }
+        .domino-part.formula-part {
+             border-left: 1px solid var(--light-grey);
+        }
+        .domino-part img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .drop-zone {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed var(--medium-grey);
+            border-radius: 8px;
+            background-color: transparent;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+        }
+        
+        /* MODIFICATION : Règle de style spécifique pour les dominos du Niveau 4 */
+        .level4-active .domino {
+            width: 600px; /* Largeur augmentée pour le Niveau 4 */
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+            border-color: var(--error-red);
+        }
+        @keyframes placeDomino {
+            from {
+                opacity: 0;
+                transform: scale(0.7);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .placed {
+            animation: placeDomino 0.4s ease-out;
+        }
+        
+        .feedback-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #success-check {
+            color: var(--success-green);
+        }
+        #error-cross {
+            color: var(--error-red);
+        }
+        .feedback-icon.show {
+            opacity: 1;
+            animation: fade-out 0.8s forwards;
+        }
+        @keyframes fade-out {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            60% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        #win-modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        #win-modal-content {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            color: var(--text-dark);
+            max-width: 90%;
+            width: 400px;
+        }
+        #win-modal-content h2 {
+            color: var(--text-dark);
+            font-size: 2.2em;
+            margin-bottom: 0.8em;
+        }
+        #win-stars {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+            color: var(--star-yellow);
+        }
+        #win-modal-content p {
+            font-size: 1.2em;
+            margin-bottom: 1.5em;
+        }
+        #win-modal-content button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        #win-modal-content button:hover {
+            background-color: #5dade2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="level-selection">
+        <h1>Les Dominos Moléculaires</h1>
+        <h2>Récupère le plus d'étoiles possibles :</h2>
+        <div id="rules-box" class="info-box">
+            <h4>Règles du jeu</h4>
+            <ul>
+                <li>Associez les formules et les modèles moléculaires.</li>
+                <li>Chaque erreur ajoute 5 secondes de pénalité.</li>
+            </ul>
+        </div>
+        <div class="level-buttons"></div>
+        <div id="objectives-box" class="info-box">
+             <h4>Collectionne un maximum d'étoiles !</h4>
+             <ul class="scores-list">
+                <li><span>★★★★★</span> &lt; 25s</li>
+                <li><span>★★★★</span>☆ &lt; 40s</li>
+                <li><span>★★★</span>☆☆ &lt; 60s</li>
+                <li><span>★★</span>☆☆☆ &lt; 90s</li>
+                <li><span>★</span>☆☆☆☆ &ge; 90s</li>
+            </ul>
+        </div>
+        <div id="total-stars-counter">
+            Total des étoiles : <span id="total-stars-value">0</span> ★
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <div id="game-header">
+            <h1 id="game-title"></h1>
+            <div id="timer">00:00</div>
+            <button id="back-to-menu-btn">Retour au menu</button>
+        </div>
+        
+        <section class="game-section">
+            <h2 id="hand-title">Pièces à placer</h2>
+            <div id="hand-container">
+                <div id="hand"></div>
+                <div id="error-cross" class="feedback-icon">✖</div>
+                <div id="success-check" class="feedback-icon">✔</div>
+            </div>
+        </section>
+        
+        <section class="game-section">
+            <h2 id="board-title">Chaîne de dominos</h2>
+            <div id="board"></div>
+        </section>
+    </div>
+
+    <div id="win-modal">
+        <div id="win-modal-content">
+            <h2>Félicitations !</h2>
+            <div id="win-stars"></div>
+            <p>Niveau complété !</p>
+            <button id="win-back-to-menu-btn">Retour au menu</button>
+        </div>
+    </div>
+    
+    <audio id="success-sound" src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjQwLjEwMQAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAA/gA4FoABsAAg3gAARBoGFgBwYGQwN2Q3/gB4FoAFwAAGACsAAABCAAADyVCwQkAbgAAC4AAAAAAVFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA4gAAgAAAAA/+0E0gAAgAAAAA/gA5VpAADgAAGSWAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA5gAgwAABbbYAAA/gBJVlMAA4AABjbYAAACwAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/kAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA6gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA7gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA8gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA9gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA+gAIgAABjbYAAA/gBJVpQAA4AABknoAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA/gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBAgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBBgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBCgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBDgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBEgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBFgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBGgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBHAAIAMAABDbYAAA/gBJVaQAA4AADdDYAAAGwAAdVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBH4AIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBIgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBJgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBKgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBLAAIAMAABDbYAAA/gBJVaQAA4AADdDYAAAGwAAdVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBMAAIAwAAENtgAAD+AEldpQADgAAN0NgAAAbAAB1VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/zwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBMwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBNQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBOAAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBOwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBPQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBPwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBQQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBQUAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBQQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBRQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBRwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBSQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBSwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBTwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBUQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBVAwAAAAAAAAD/AAAAAAA="></audio>
+    <audio id="error-sound" src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjQwLjEwMQAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAA/gA4FoABsAAg3gAARBoGFgBwYGQwN2Q3/gB4FoAFwAAGACsAAABCAAADyVCwQkAbgAAC4AAAAAAVFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA4gAAgAAAAA/+0E0gAAgAAAAA/gA5VpAADgAAGSWAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA5gAgwAABbbYAAA/gBJVlMAA4AABjbYAAACwAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/kAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA6gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA7gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA8gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA9gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA+gAIgAABjbYAAA/gBJVpQAA4AABknoAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tA/gAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBAgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBBgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBCgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBDgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBEgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBFgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBGgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBHAAIAMAABDbYAAA/gBJVaQAA4AADdDYAAAGwAAdVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBH4AIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBIgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBJgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBKgAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBLAAIAMAABDbYAAA/gBJVaQAA4AADdDYAAAGwAAdVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBMAAIAwAAENtgAAD+AEldpQADgAAN0NgAAAbAAB1VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/zwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBMwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBNQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBOAAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBOwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBPQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBPwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBQQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBQUAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBQQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBRQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBRwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBSQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBSwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBTwAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBUQAIgAABbbYAAAKAAANVpQAA4AABknYAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tBVAwAAAAAAAAD/AAAAAAA="></audio>
+
+    <script>
+        // --- DONNÉES DE TOUS LES NIVEAUX ---
+        const levels = {
+            level1: {
+                name: "Niveau 1",
+                data: [
+                    { id: 101, img: '2C.JPG',      formula: 'CH_4',        imgValue: '2C',      formulaValue: 'CH4' },
+                    { id: 102, img: '2H.JPG',      formula: 'H_2O',        imgValue: '2H',      formulaValue: 'H2O' },
+                    { id: 103, img: '2N.JPG',      formula: 'H_2',         imgValue: '2N',      formulaValue: 'H2' },
+                    { id: 104, img: 'C + O2.JPG',  formula: 'N + O_2',     imgValue: 'C+O2',    formulaValue: 'N+O2' },
+                    { id: 105, img: 'CH4.JPG',     formula: 'N_2',         imgValue: 'CH4',     formulaValue: 'N2' },
+                    { id: 106, img: 'CO.JPG',      formula: 'NO_2',        imgValue: 'CO',      formulaValue: 'NO2' },
+                    { id: 107, img: 'CO2.JPG',     formula: 'C + O_2',     imgValue: 'CO2',     formulaValue: 'C+O2' },
+                    { id: 108, img: 'H2.jpg',      formula: 'O_2',         imgValue: 'H2',      formulaValue: 'O2' },
+                    { id: 109, img: 'H2O.JPG',     formula: 'CO_2',        imgValue: 'H2O',     formulaValue: 'CO2' },
+                    { id: 110, img: 'N + O2.JPG',  formula: 'H_2 + O',     imgValue: 'N+O2',    formulaValue: 'H2+O' },
+                    { id: 111, img: 'H2+O.JPG',    formula: 'CO',          imgValue: 'H2+O',    formulaValue: 'CO' },
+                    { id: 112, img: 'N2.JPG',      formula: '2H',          imgValue: 'N2',      formulaValue: '2H' },
+                    { id: 113, img: 'NO2.JPG',     formula: '2N',          imgValue: 'NO2',     formulaValue: '2N' },
+                    { id: 114, img: 'O2.JPG',      formula: '2C',          imgValue: 'O2',      formulaValue: '2C' }
+                ]
+            },
+            level2: {
+                name: "Niveau 2",
+                data: [
+                    { id: 201, img: 'CO + 2 H.JPG',  formula: '4 H_2',       imgValue: 'CO+2H',   formulaValue: '4H2' },
+                    { id: 202, img: 'S + O2.JPG',    formula: 'CO + 2 H',    imgValue: 'S+O2',    formulaValue: 'CO+2H' },
+                    { id: 203, img: '2O3.JPG',       formula: 'S + O_2',     imgValue: '2O3',     formulaValue: 'S+O2' },
+                    { id: 204, img: 'NO3.JPG',       formula: '2 O_3',       imgValue: 'NH3',     formulaValue: '2O3' },
+                    { id: 205, img: 'CO + H2.JPG',   formula: 'NH_3',        imgValue: 'CO+H2',   formulaValue: 'NH3' },
+                    { id: 206, img: 'SO2.JPG',       formula: 'CO + H_2',    imgValue: 'SO2',     formulaValue: 'CO+H2' },
+                    { id: 207, img: '3N2.JPG',       formula: 'SO_2',        imgValue: '3N2',     formulaValue: 'SO2' },
+                    { id: 208, img: '2H2O.JPG',      formula: '3 N_2',       imgValue: '2H2O',    formulaValue: '3N2' },
+                    { id: 209, img: '3O2.JPG',       formula: '2 H_2O',      imgValue: '3O2',     formulaValue: '2H2O' },
+                    { id: 210, img: '2C2H6.JPG',     formula: '3 O_2',       imgValue: '2C2H6',   formulaValue: '3O2' },
+                    { id: 211, img: '2 O+2H2.JPG',   formula: '2 C_2H_6',    imgValue: '2O+2H2',  formulaValue: '2C2H6' },
+                    { id: 212, img: '2CH4.JPG',      formula: '2 O + 2 H_2', imgValue: '2CH4',    formulaValue: '2O+2H2' },
+                    { id: 213, img: '2CO2.JPG',      formula: '2 CH_4',      imgValue: '2CO2',    formulaValue: '2CH4' },
+                    { id: 214, img: '4H2.JPG',       formula: '2 CO_2',      imgValue: '4H2',     formulaValue: '2CO2' }
+                ]
+            },
+            level3: {
+                name: "Niveau 3",
+                data: [
+                    { id: 301, img: '2CH4+O2.JPG',      formula: '2 NO_2 + S',      imgValue: '2CH4+O2',     formulaValue: '2NO2+S' },
+                    { id: 302, img: '2NH3+O2.JPG',      formula: '2 CH_4 + O_2',    imgValue: '2NH3+O2',     formulaValue: '2CH4+O2' },
+                    { id: 303, img: 'CO2+CO.JPG',       formula: '2 Cl_2',          imgValue: 'CO2+CO',      formulaValue: '2Cl2' },
+                    { id: 304, img: '2NO2+Cl2.JPG',     formula: 'CO_2 + CO',       imgValue: '2NO2+Cl2',    formulaValue: 'CO2+CO' },
+                    { id: 305, img: 'C4H10.JPG',        formula: '2 NO_2 + Cl_2',   imgValue: 'C4H10',       formulaValue: '2NO2+Cl2' },
+                    { id: 306, img: '2SO2+CO2.JPG',     formula: 'C_4H_10',         imgValue: '2SO2+CO2',    formulaValue: 'C4H10' },
+                    { id: 307, img: 'N2+2H+2H2.JPG',    formula: '2 SO_2 + CO_2',   imgValue: 'N2+2H+2H2',   formulaValue: '2SO2+CO2' },
+                    { id: 308, img: 'N2+2HCl.JPG',      formula: 'N_2 + 2 H + 2 H_2', imgValue: 'N2+2HCl',     formulaValue: 'N2+2H+2H2' },
+                    { id: 309, img: '2C + O3.JPG',      formula: 'N_2 + 2 HCl',     imgValue: '2C+O3',       formulaValue: 'N2+2HCl' },
+                    { id: 310, img: '2H2+2C+H2O.JPG',   formula: '2 C + O_3',       imgValue: '2H2+2C+H2O',  formulaValue: '2C+O3' },
+                    { id: 311, img: '4Cl.JPG',          formula: '2 H_2 + 2 C +H_2O', imgValue: '4Cl',         formulaValue: '2H2+2C+H2O' },
+                    { id: 312, img: '2NO2+S.JPG',       formula: '4 Cl',            imgValue: '2NO2+S',      formulaValue: '4Cl' },
+                    { id: 313, img: 'C2H6O.JPG',        formula: '2 NH_3 + O_2',    imgValue: 'C2H6O',       formulaValue: '2NH3+O2' },
+                    { id: 314, img: '2Cl2.JPG',         formula: 'C_2H_6O',         imgValue: '2Cl2',        formulaValue: 'C2H6O' }
+                ]
+            },
+            level4: {
+                name: "Niveau 4",
+                data: [
+                    { id: 401, img: 'C+2H2O+CO2.JPG',      formula: '2 CO + 2 H_2O',                  imgValue: 'C+2H2O+CO2',    formulaValue: '2CO+2H2O' },
+                    { id: 402, img: '2CO+2H2O.JPG',        formula: 'CO + CO_2 + H_2O + H_2',         imgValue: '2CO+2H2O',      formulaValue: 'CO+CO2+H2O+H2' },
+                    { id: 403, img: 'CO+CO2+H2O+H2.JPG',   formula: '2 H + O + H_2 + C_2 + O_3',      imgValue: 'CO+CO2+H2O+H2', formulaValue: '2H+O+H2+C2+O3' },
+                    { id: 404, img: '2H+O+H2+C2+O3.JPG',   formula: 'CO+CO_2+H_2O+2H',                imgValue: '2H+O+H2+C2+O3', formulaValue: 'CO+CO2+H2O+2H' },
+                    { id: 405, img: 'CO+CO2+H2O+2H.JPG',   formula: 'C_2 + O_2 + 2 H_2O',             imgValue: 'CO+CO2+H2O+2H', formulaValue: 'C2+O2+2H2O' },
+                    { id: 406, img: 'C2+O2+H2O.JPG',       formula: 'C + H_2O + 2 H + O + CO_2',      imgValue: 'C2+O2+2H2O',    formulaValue: 'C+H2O+2H+O+CO2' },
+                    { id: 407, img: 'C+H2O+2H+O+CO2.JPG',  formula: 'CO + H_2O + H + H_2 + O_2',      imgValue: 'C+H2O+2H+O+CO2',formulaValue: 'CO+H2O+H+H2+O2' },
+                    { id: 408, img: 'CO+H2O+H+H2+O2.JPG',  formula: 'CO_2 + 2 H_2 + C + O_2',         imgValue: 'CO+H2O+H+H2+O2',formulaValue: 'CO2+2H2+C+O2' },
+                    { id: 409, img: 'CO2+2H2+C+O2.JPG',    formula: '4 O + 2 C + 4 H',                imgValue: 'CO2+2H2+C+O2',  formulaValue: '4O+2C+4H' },
+                    { id: 410, img: '2O+2C+4H.JPG',        formula: 'H_2 + 2 H + 2 CO_2',             imgValue: '4O+2C+4H',      formulaValue: 'H2+2H+2CO2' },
+                    { id: 411, img: 'H2+2H+2CO2.JPG',      formula: 'CO_2 + H_2 + 2 H + O_2',         imgValue: 'H2+2H+2CO2',    formulaValue: 'CO2+H2+2H+O2' },
+                    { id: 412, img: 'CO2+H2+2H+O2.JPG',    formula: '2 C + 3 O + H_2O + 2H',          imgValue: 'CO2+H2+2H+O2',  formulaValue: '2C+3O+H2O+2H' },
+                    { id: 413, img: '2C+3O+H2O+2H.JPG',    formula: '2 H + 2 C + O + O_3 + H_2',      imgValue: '2C+3O+H2O+2H',  formulaValue: '2H+2C+O+O3+H2' },
+                    { id: 414, img: '2H+2C+O+O3+H2.JPG',   formula: 'C + 2 H_2O + CO_2',              imgValue: '2H+2C+O+O3+H2', formulaValue: 'C+2H2O+CO2' }
+                ]
+            }
+        };
+
+        const handElement = document.getElementById('hand');
+        const boardElement = document.getElementById('board');
+        let dominoesInHand = [];
+
+        let timerInterval = null;
+        let startTime = 0;
+        let currentLevelId = null;
+        let scores = {};
+
+        // --- GESTION DES NIVEAUX ET SCORES ---
+
+        function loadScores() {
+            const savedScores = localStorage.getItem('dominoGameScores');
+            if (savedScores) {
+                scores = JSON.parse(savedScores);
+            }
+        }
+
+        function saveScores() {
+            localStorage.setItem('dominoGameScores', JSON.stringify(scores));
+        }
+
+        function updateTotalStarsCounter() {
+            let totalStars = 0;
+            for (const levelId in scores) {
+                totalStars += scores[levelId];
+            }
+            document.getElementById('total-stars-value').textContent = totalStars;
+        }
+
+        function showLevelSelection() {
+            const menu = document.getElementById('level-selection');
+            const game = document.getElementById('game-container');
+            const winModal = document.getElementById('win-modal');
+            const buttonsContainer = menu.querySelector('.level-buttons');
+            
+            document.body.className = '';
+
+            buttonsContainer.innerHTML = ''; 
+
+            for (const levelId in levels) {
+                const level = levels[levelId];
+                const button = document.createElement('button');
+                button.className = 'level-btn';
+                
+                const levelNameSpan = document.createElement('span');
+                levelNameSpan.textContent = level.name;
+
+                const starsContainer = document.createElement('div');
+                starsContainer.className = 'stars-container';
+                const bestScore = scores[levelId] || 0;
+                for(let i = 1; i <= 5; i++) {
+                    const star = document.createElement('span');
+                    star.className = 'star';
+                    star.textContent = '★';
+                    if (i > bestScore) {
+                        star.classList.add('dimmed');
+                    }
+                    starsContainer.appendChild(star);
+                }
+                
+                button.appendChild(levelNameSpan);
+                button.appendChild(starsContainer);
+                button.onclick = () => initLevel(levelId);
+                buttonsContainer.appendChild(button);
+            }
+
+            menu.classList.remove('hidden');
+            game.classList.add('hidden');
+            winModal.style.display = 'none';
+            updateTotalStarsCounter();
+        }
+
+        function initLevel(levelId) {
+            const menu = document.getElementById('level-selection');
+            const game = document.getElementById('game-container');
+            const selectedLevel = levels[levelId];
+            currentLevelId = levelId;
+
+            if (levelId === 'level4') {
+                document.body.classList.add('level4-active');
+            } else {
+                document.body.classList.remove('level4-active');
+            }
+
+            menu.classList.add('hidden');
+            game.classList.remove('hidden');
+
+            document.getElementById('game-title').textContent = selectedLevel.name;
+            dominoesInHand = [...selectedLevel.data];
+            
+            handElement.innerHTML = '';
+            boardElement.innerHTML = '';
+
+            startTimer();
+            startGame();
+        }
+
+        // --- LOGIQUE DU JEU ---
+        
+        function formatFormula(text) {
+            return text.replace(/_(\d+)/g, '<sub>$1</sub>');
+        }
+
+        function createDominoElement(domino, isReversed = false, inHand = false) {
+            const dominoEl = document.createElement('div');
+            dominoEl.className = 'domino';
+            if (inHand) {
+                dominoEl.classList.add('domino-in-hand');
+                dominoEl.addEventListener('click', handleDominoClick);
+            }
+            dominoEl.id = `domino-${domino.id}`;
+            dominoEl.dataset.id = domino.id;
+            dominoEl.dataset.imgValue = domino.imgValue;
+            dominoEl.dataset.formulaValue = domino.formulaValue;
+            
+            const imgPart = `<div class="domino-part image-part"><img src="${domino.img}" alt="${domino.imgValue}"></div>`;
+            const formulaPart = `<div class="domino-part formula-part">${formatFormula(domino.formula)}</div>`;
+
+            if (isReversed) {
+                dominoEl.innerHTML = formulaPart + imgPart;
+            } else {
+                dominoEl.innerHTML = imgPart + formulaPart;
+            }
+            dominoEl.dataset.leftValue = dominoEl.firstElementChild.classList.contains('image-part') ? domino.imgValue : domino.formulaValue;
+            dominoEl.dataset.rightValue = dominoEl.lastElementChild.classList.contains('image-part') ? domino.imgValue : domino.formulaValue;
+            
+            return dominoEl;
+        }
+
+        function createPlacementZone(expectedValue) {
+            const zone = document.createElement('div');
+            zone.className = 'drop-zone';
+            zone.dataset.expectedValue = expectedValue;
+            return zone;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        function startGame() {
+            shuffle(dominoesInHand);
+            
+            const firstDominoData = dominoesInHand.pop();
+            const firstDominoEl = createDominoElement(firstDominoData, false, false);
+            boardElement.appendChild(firstDominoEl);
+
+            dominoesInHand.forEach(domino => {
+                const dominoEl = createDominoElement(domino, false, true);
+                handElement.appendChild(dominoEl);
+            });
+            
+            updateBoard();
+        }
+
+        function updateBoard() {
+            boardElement.querySelectorAll('.drop-zone').forEach(zone => zone.remove());
+
+            const lastDomino = boardElement.lastElementChild;
+            const rightZone = createPlacementZone(lastDomino.dataset.rightValue);
+            boardElement.appendChild(rightZone);
+            
+            if (dominoesInHand.length === 0) {
+                stopTimer();
+                const completionTime = Math.floor((Date.now() - startTime) / 1000);
+                const starsEarned = calculateStars(completionTime);
+                
+                const bestScore = scores[currentLevelId] || 0;
+                if(starsEarned > bestScore) {
+                    scores[currentLevelId] = starsEarned;
+                    saveScores();
+                }
+
+                displayWinModal(starsEarned);
+            }
+        }
+
+        function handleDominoClick(e) {
+            const clickedDominoEl = e.currentTarget;
+            const clickedDominoId = clickedDominoEl.dataset.id;
+            
+            const levelData = Object.values(levels).find(lvl => lvl.data.some(d => d.id == clickedDominoId)).data;
+            const clickedDominoData = levelData.find(d => d.id == clickedDominoId);
+
+            const placementZone = boardElement.lastElementChild;
+            const expectedValue = placementZone.dataset.expectedValue;
+
+            if (clickedDominoData.imgValue === expectedValue) {
+                placeDomino(clickedDominoData, clickedDominoEl, false);
+            } else if (clickedDominoData.formulaValue === expectedValue) {
+                placeDomino(clickedDominoData, clickedDominoEl, true);
+            } else {
+                startTime -= 5000;
+                const timerEl = document.getElementById('timer');
+                timerEl.classList.add('timer-penalty');
+                setTimeout(() => timerEl.classList.remove('timer-penalty'), 500);
+                
+                updateTimerDisplay();
+                playErrorSound();
+                showErrorFeedback();
+                clickedDominoEl.classList.add('shake');
+                setTimeout(() => {
+                    clickedDominoEl.classList.remove('shake');
+                }, 300);
+            }
+        }
+
+        function placeDomino(dominoData, clickedElement, isReversed) {
+            playSuccessSound();
+            showSuccessFeedback();
+            dominoesInHand = dominoesInHand.filter(d => d.id !== dominoData.id);
+            const newDominoForBoard = createDominoElement(dominoData, isReversed, false);
+            
+            newDominoForBoard.classList.add('placed');
+            
+            const dropZone = boardElement.querySelector('.drop-zone');
+            if(dropZone) dropZone.remove();
+
+            boardElement.appendChild(newDominoForBoard);
+            
+            clickedElement.remove();
+            updateBoard();
+        }
+
+        // --- ANIMATIONS, SONS ET TIMER ---
+        
+        function updateTimerDisplay() {
+            const timerEl = document.getElementById('timer');
+            const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+            const displaySeconds = Math.max(0, elapsedSeconds);
+            const minutes = Math.floor(displaySeconds / 60).toString().padStart(2, '0');
+            const seconds = (displaySeconds % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${minutes}:${seconds}`;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+        
+        function calculateStars(timeInSeconds) {
+            if (timeInSeconds < 25) return 5;
+            if (timeInSeconds < 40) return 4;
+            if (timeInSeconds < 60) return 3;
+            if (timeInSeconds < 90) return 2;
+            return 1;
+        }
+        
+        function displayWinModal(stars) {
+            const winStarsEl = document.getElementById('win-stars');
+            winStarsEl.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.textContent = '★';
+                if(i > stars) {
+                    star.style.color = '#e0e0e0';
+                }
+                winStarsEl.appendChild(star);
+            }
+            document.getElementById('win-modal').style.display = 'flex';
+        }
+        
+        function showErrorFeedback() {
+            const cross = document.getElementById('error-cross');
+            cross.classList.add('show');
+            cross.addEventListener('animationend', () => {
+                cross.classList.remove('show');
+            }, { once: true });
+        }
+
+        function showSuccessFeedback() {
+            const check = document.getElementById('success-check');
+            check.classList.add('show');
+            check.addEventListener('animationend', () => {
+                check.classList.remove('show');
+            }, { once: true });
+        }
+
+        function playSuccessSound() {
+            const sound = document.getElementById('success-sound');
+            sound.currentTime = 0;
+            sound.play();
+        }
+
+        function playErrorSound() {
+            const sound = document.getElementById('error-sound');
+            sound.currentTime = 0;
+            sound.play();
+        }
+
+        // --- DÉMARRAGE DU JEU ---
+        document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+            stopTimer();
+            showLevelSelection();
+        });
+        document.getElementById('win-back-to-menu-btn').addEventListener('click', showLevelSelection);
+        
+        loadScores();
+        showLevelSelection();
+
+    </script>
+</body>
+</html>
